@@ -278,6 +278,8 @@ Other decisions:
 
 See [docs/PRODUCTION.md](docs/PRODUCTION.md) for how each of these would be addressed.
 
+Before releasing this to production, I would read every line of code in this repository, including the exported n8n workflows. Passing tests and a working demo are not the same as knowing exactly what ships.
+
 ## Testing
 
 ```bash
