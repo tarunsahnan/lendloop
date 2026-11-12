@@ -40,17 +40,8 @@ export function PublicBoard({
 
   return (
     <div className="mx-auto w-full max-w-5xl flex-1 px-5 sm:px-8">
-      <header className="flex items-center justify-between py-5">
+      <header className="py-5">
         <Logo />
-        {isSignedIn ? (
-          <Link href="/tools" className="text-sm font-medium text-ink underline-offset-4 hover:underline">
-            Go to the board
-          </Link>
-        ) : (
-          <SignInButton mode="modal" forceRedirectUrl="/tools">
-            <Button variant="secondary">Sign in</Button>
-          </SignInButton>
-        )}
       </header>
 
       <main className="pb-16 pt-10 md:pt-16">
