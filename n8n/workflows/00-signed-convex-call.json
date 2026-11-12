@@ -1,0 +1,169 @@
+{
+  "id": "LendLoopSigned01",
+  "name": "LendLoop: Signed Convex call",
+  "active": false,
+  "nodes": [
+    {
+      "id": "signed-001",
+      "name": "About",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        -240
+      ],
+      "parameters": {
+        "content": "## Signed Convex call\nEvery request from n8n to Convex goes through here. Each run builds a **fresh timestamp**, stringifies the body **once**, signs those exact bytes and sends them unchanged.\n\nRetrying the Execute node in a parent workflow restarts this sub-workflow, so a retried call is never sent with an expired signature.\n\nTo point n8n at a cloud deployment, change `CONVEX_SITE_URL` in **Prepare request**.",
+        "width": 980,
+        "height": 180,
+        "color": 7
+      }
+    },
+    {
+      "id": "signed-002",
+      "name": "When called",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "method"
+            },
+            {
+              "name": "path"
+            },
+            {
+              "name": "body",
+              "type": "object"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "signed-003",
+      "name": "Prepare request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const CONVEX_SITE_URL = 'http://host.docker.internal:3211';\n\nconst { method, path, body } = $input.first().json;\nconst rawBody = body && Object.keys(body).length > 0 ? JSON.stringify(body) : '';\n\nreturn [{\n  json: {\n    url: CONVEX_SITE_URL + path,\n    method,\n    path,\n    rawBody,\n    timestamp: String(Math.floor(Date.now() / 1000)),\n  },\n}];"
+      }
+    },
+    {
+      "id": "signed-004",
+      "name": "Sign",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "position": [
+        520,
+        0
+      ],
+      "parameters": {
+        "action": "hmac",
+        "binaryData": false,
+        "type": "SHA256",
+        "value": "={{ [$json.timestamp, $json.method, $json.path, $json.rawBody].join('.') }}",
+        "dataPropertyName": "signature",
+        "encoding": "hex"
+      },
+      "credentials": {
+        "crypto": {
+          "id": "LendLoopCredOut1",
+          "name": "LendLoop outbound HMAC"
+        }
+      }
+    },
+    {
+      "id": "signed-005",
+      "name": "Send",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        780,
+        0
+      ],
+      "parameters": {
+        "method": "={{ $json.method }}",
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-LL-Timestamp",
+              "value": "={{ $json.timestamp }}"
+            },
+            {
+              "name": "X-LL-Signature",
+              "value": "=v1={{ $json.signature }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.rawBody }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    }
+  ],
+  "connections": {
+    "When called": {
+      "main": [
+        [
+          {
+            "node": "Prepare request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare request": {
+      "main": [
+        [
+          {
+            "node": "Sign",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign": {
+      "main": [
+        [
+          {
+            "node": "Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

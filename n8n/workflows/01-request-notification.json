@@ -1,0 +1,468 @@
+{
+  "id": "LendLoopEvent001",
+  "name": "LendLoop: Request notification",
+  "active": false,
+  "nodes": [
+    {
+      "id": "event-001",
+      "name": "About",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        -260
+      ],
+      "parameters": {
+        "content": "## Request notification\nConvex posts here when a borrow request is created or changes status.\n\n**The HTTP response is the delivery receipt.** It is sent after Notify, so 2xx means the person was notified and anything else makes Convex retry with a new `attempt` number. Deduplicating on `eventId:attempt` drops replays while letting genuine retries through.\n\nThe mock notifier records the message in this execution's data. Swap **Notify (mock)** for an email, Slack or Discord node to send for real.",
+        "width": 1500,
+        "height": 190,
+        "color": 7
+      }
+    },
+    {
+      "id": "event-002",
+      "name": "Loan event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lendloop-loan-event",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "webhookId": "lendloop-loan-event"
+    },
+    {
+      "id": "event-003",
+      "name": "Read signature",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const { headers } = $input.first().json;\n\nlet rawBody = '';\ntry {\n  rawBody = (await this.helpers.getBinaryDataBuffer(0, 'data')).toString('utf8');\n} catch {\n  // An empty request has no binary part. It fails verification below.\n}\n\nreturn [{\n  json: {\n    timestamp: headers['x-ll-timestamp'] ?? '',\n    signature: headers['x-ll-signature'] ?? '',\n    rawBody,\n  },\n}];"
+      }
+    },
+    {
+      "id": "event-004",
+      "name": "Verify signature",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        520,
+        0
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "LendLoopVerify01",
+          "mode": "id",
+          "cachedResultName": "LendLoop: Verify signature"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $json.timestamp }}",
+            "signature": "={{ $json.signature }}",
+            "method": "POST",
+            "path": "/webhook/lendloop-loan-event",
+            "rawBody": "={{ $json.rawBody }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "signature",
+              "displayName": "signature",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "method",
+              "displayName": "method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "path",
+              "displayName": "path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "rawBody",
+              "displayName": "rawBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "event-005",
+      "name": "Signature valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        780,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "Signature valid?-condition",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "event-006",
+      "name": "Respond 401",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1040,
+        220
+      ],
+      "parameters": {
+        "respondWith": "noData",
+        "options": {
+          "responseCode": 401
+        }
+      }
+    },
+    {
+      "id": "event-007",
+      "name": "Skip replays",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -20
+      ],
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "logic": "removeItemsWithAlreadySeenKeyValues",
+        "dedupeValue": "={{ $json.body.eventId }}:{{ $json.body.attempt }}",
+        "options": {
+          "scope": "workflow",
+          "historySize": 10000
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "event-008",
+      "name": "New event?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1300,
+        -20
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "New event?-condition",
+              "leftValue": "={{ !!$json.body }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "event-009",
+      "name": "Respond 200 (replay)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1560,
+        180
+      ],
+      "parameters": {
+        "respondWith": "noData",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "event-010",
+      "name": "Compose message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        -40
+      ],
+      "parameters": {
+        "jsCode": "const { eventId, type, toolName, startDate, endDate, recipient } = $input.first().json.body;\nconst dates = `${startDate} to ${endDate}`;\n\nconst messages = {\n  'loan.requested': `someone asked to borrow your ${toolName} for ${dates}.`,\n  'loan.approved': `your request for the ${toolName} (${dates}) was approved.`,\n  'loan.declined': `your request for the ${toolName} (${dates}) was declined.`,\n  'loan.cancelled': `the loan of the ${toolName} (${dates}) was cancelled.`,\n  'loan.returned': `the ${toolName} was marked as returned. Thanks!`,\n};\n\nreturn [{\n  json: {\n    eventId,\n    recipientId: recipient.id,\n    firstName: recipient.firstName,\n    message: `Hi ${recipient.firstName}, ${messages[type]}`,\n  },\n}];"
+      }
+    },
+    {
+      "id": "event-011",
+      "name": "Notify (mock)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1820,
+        -40
+      ],
+      "parameters": {
+        "jsCode": "const { recipientId, firstName, message } = $input.first().json;\n\n// Behaves like a provider's bounce-simulator address, so the failure path can be exercised.\nif (firstName === 'Bounce') {\n  throw new Error('Simulated provider bounce');\n}\n\nreturn [{ json: { channel: 'mock', recipientId, message, deliveredAt: new Date().toISOString() } }];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "event-012",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2080,
+        -120
+      ],
+      "parameters": {
+        "respondWith": "noData",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "event-013",
+      "name": "Respond 500",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2080,
+        80
+      ],
+      "parameters": {
+        "respondWith": "noData",
+        "options": {
+          "responseCode": 500
+        }
+      }
+    },
+    {
+      "id": "event-014",
+      "name": "Fail execution",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2340,
+        80
+      ],
+      "parameters": {
+        "errorType": "errorMessage",
+        "errorMessage": "Notification could not be delivered"
+      }
+    }
+  ],
+  "connections": {
+    "Loan event": {
+      "main": [
+        [
+          {
+            "node": "Read signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read signature": {
+      "main": [
+        [
+          {
+            "node": "Verify signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify signature": {
+      "main": [
+        [
+          {
+            "node": "Signature valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Signature valid?": {
+      "main": [
+        [
+          {
+            "node": "Skip replays",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 401",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip replays": {
+      "main": [
+        [
+          {
+            "node": "New event?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New event?": {
+      "main": [
+        [
+          {
+            "node": "Compose message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 200 (replay)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose message": {
+      "main": [
+        [
+          {
+            "node": "Notify (mock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify (mock)": {
+      "main": [
+        [
+          {
+            "node": "Respond 200",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 500",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond 500": {
+      "main": [
+        [
+          {
+            "node": "Fail execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC",
+    "errorWorkflow": "LendLoopErrors01"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

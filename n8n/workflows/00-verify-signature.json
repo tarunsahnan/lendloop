@@ -1,0 +1,126 @@
+{
+  "id": "LendLoopVerify01",
+  "name": "LendLoop: Verify signature",
+  "active": false,
+  "nodes": [
+    {
+      "id": "verify-001",
+      "name": "About",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        -220
+      ],
+      "parameters": {
+        "content": "## Verify signature\nChecks a request signed by Convex. The HMAC secret stays in the **Crypto credential**. The Code node only compares two computed values, in constant time, and never sees the secret.\n\nA malformed signature is treated as invalid rather than throwing, so anonymous traffic cannot trigger the error workflow.",
+        "width": 720,
+        "height": 160,
+        "color": 7
+      }
+    },
+    {
+      "id": "verify-002",
+      "name": "When called",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "timestamp"
+            },
+            {
+              "name": "signature"
+            },
+            {
+              "name": "method"
+            },
+            {
+              "name": "path"
+            },
+            {
+              "name": "rawBody"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "verify-003",
+      "name": "Compute expected signature",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "action": "hmac",
+        "binaryData": false,
+        "type": "SHA256",
+        "value": "={{ [$json.timestamp, $json.method, $json.path, $json.rawBody].join('.') }}",
+        "dataPropertyName": "expectedSignature",
+        "encoding": "hex"
+      },
+      "credentials": {
+        "crypto": {
+          "id": "LendLoopCredIn01",
+          "name": "LendLoop inbound HMAC"
+        }
+      }
+    },
+    {
+      "id": "verify-004",
+      "name": "Check signature and age",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const MAX_SKEW_SECONDS = 300;\nconst SCHEME = 'v1=';\n\nconst { timestamp, signature, rawBody, expectedSignature } = $input.first().json;\n\nconst given = String(signature ?? '');\nconst provided = given.startsWith(SCHEME) ? given.slice(SCHEME.length) : '';\nlet difference = provided.length === expectedSignature.length ? 0 : 1;\nif (difference === 0) {\n  for (let i = 0; i < expectedSignature.length; i++) {\n    difference |= provided.charCodeAt(i) ^ expectedSignature.charCodeAt(i);\n  }\n}\n\nconst sentAt = /^\\d+$/.test(String(timestamp)) ? Number(timestamp) : NaN;\nconst fresh = Math.abs(Date.now() / 1000 - sentAt) <= MAX_SKEW_SECONDS;\n\nlet body = null;\nif (difference === 0 && fresh) {\n  try {\n    body = JSON.parse(rawBody);\n  } catch {\n    body = null;\n  }\n}\n\nreturn [{ json: { valid: body !== null, body } }];"
+      }
+    }
+  ],
+  "connections": {
+    "When called": {
+      "main": [
+        [
+          {
+            "node": "Compute expected signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute expected signature": {
+      "main": [
+        [
+          {
+            "node": "Check signature and age",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

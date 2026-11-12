@@ -1,0 +1,146 @@
+{
+  "id": "LendLoopErrors01",
+  "name": "LendLoop: Error handler",
+  "active": false,
+  "nodes": [
+    {
+      "id": "errors-001",
+      "name": "About",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        -200
+      ],
+      "parameters": {
+        "content": "## Error handler\nRuns when a workflow execution fails, and reports it to Convex so it appears on the admin page.\n\nOnly the workflow name, execution id and failed node are sent: no payload or user data. The write is keyed on execution id, so a retry cannot create a second record.",
+        "width": 760,
+        "height": 140,
+        "color": 7
+      }
+    },
+    {
+      "id": "errors-002",
+      "name": "On workflow error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "errors-003",
+      "name": "Minimal report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const { execution, trigger, workflow } = $input.first().json;\n\nreturn [{\n  json: {\n    executionId: execution?.id,\n    workflowName: workflow?.name ?? 'unknown',\n    failedNode: execution?.lastNodeExecuted ?? trigger?.error?.node?.name ?? 'trigger',\n  },\n}];"
+      }
+    },
+    {
+      "id": "errors-004",
+      "name": "Report to Convex",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        520,
+        0
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "LendLoopSigned01",
+          "mode": "id",
+          "cachedResultName": "LendLoop: Signed Convex call"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "method": "POST",
+            "path": "/n8n/automation-failure",
+            "body": "={{ $json }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "method",
+              "displayName": "method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "path",
+              "displayName": "path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "body",
+              "displayName": "body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    }
+  ],
+  "connections": {
+    "On workflow error": {
+      "main": [
+        [
+          {
+            "node": "Minimal report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Minimal report": {
+      "main": [
+        [
+          {
+            "node": "Report to Convex",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
