@@ -14,7 +14,7 @@ import type { Tone } from "@/lib/display";
 type Variant = "primary" | "secondary" | "danger" | "ghost";
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-moss text-card hover:bg-moss-deep",
+  primary: "bg-brand font-semibold text-ink hover:bg-brand-deep",
   secondary: "border border-line bg-card text-ink hover:border-ink-soft",
   danger: "bg-rust text-card hover:opacity-90",
   ghost: "text-ink-soft hover:text-ink",
@@ -35,7 +35,7 @@ export function Button({
 }
 
 const BADGES: Record<Tone, string> = {
-  moss: "bg-moss-soft text-moss-deep",
+  green: "bg-go-soft text-go",
   amber: "bg-amber-soft text-amber",
   rust: "bg-rust-soft text-rust",
   slate: "bg-slate-soft text-slate",
@@ -54,7 +54,7 @@ export function Badge({ tone, children }: { tone: Tone; children: ReactNode }) {
 
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <span className="font-mono text-[11px] uppercase tracking-wider text-ink-soft">
+    <span className="text-xs font-medium text-ink-soft">
       {children}
     </span>
   );
@@ -72,7 +72,7 @@ export function PageHeader({
   return (
     <header className="mb-7 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight">
+        <h1 className="text-3xl font-bold tracking-tight">
           {title}
         </h1>
         <p className="mt-1 text-ink-soft">{subtitle}</p>
@@ -92,8 +92,8 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
-      <p className="font-display text-lg font-medium">{title}</p>
+    <div className="rounded-lg border border-dashed border-line bg-card px-6 py-14 text-center">
+      <p className="text-lg font-semibold">{title}</p>
       <p className="mx-auto mt-1 max-w-sm text-sm text-ink-soft">{hint}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>
@@ -104,7 +104,7 @@ export function LoadingCards({ count = 3 }: { count?: number }) {
   return (
     <div role="status" aria-label="Loading" className="grid gap-4">
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="h-24 animate-pulse rounded-xl bg-line/60" />
+        <div key={i} className="h-24 animate-pulse rounded-lg bg-line/60" />
       ))}
     </div>
   );
@@ -172,11 +172,11 @@ export function Modal({
       ref={ref}
       onClose={onClose}
       aria-label={title}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line bg-card p-6 text-ink"
+      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-xl border border-line bg-card p-6 text-ink shadow-xl"
     >
       {open && (
         <>
-          <h2 className="font-display text-xl font-semibold">{title}</h2>
+          <h2 className="text-xl font-bold">{title}</h2>
           <div className="mt-4">{children}</div>
         </>
       )}

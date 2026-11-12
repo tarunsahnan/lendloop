@@ -53,13 +53,15 @@ function NavLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-        active ? "bg-moss-soft text-moss-deep" : "text-ink-soft hover:text-ink"
+      className={`-mb-px inline-flex items-center whitespace-nowrap border-b-2 pb-2.5 pt-1 text-sm font-medium transition-colors ${
+        active
+          ? "border-brand text-ink"
+          : "border-transparent text-ink-soft hover:text-ink"
       }`}
     >
       {label}
       {count ? (
-        <span className="ml-1.5 rounded-full bg-amber-soft px-1.5 py-0.5 font-mono text-[11px] text-amber">
+        <span className="ml-1.5 rounded-full bg-ink px-1.5 text-[11px] font-semibold leading-[18px] tabular-nums text-card">
           {count}
         </span>
       ) : null}
@@ -92,7 +94,7 @@ function Nav({ user }: { user: CurrentUser }) {
       <nav
         ref={navRef}
         aria-label="Main"
-        className="mx-auto flex w-full max-w-5xl gap-1 overflow-x-auto px-3 pb-2 sm:px-6"
+        className="mx-auto flex w-full max-w-5xl gap-6 overflow-x-auto px-5 sm:px-8"
       >
         {LINKS.map((link) => (
           <NavLink
@@ -135,7 +137,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (failed) {
     return (
       <main className="mx-auto w-full max-w-md flex-1 px-6 py-24 text-center">
-        <h1 className="font-display text-2xl font-semibold">
+        <h1 className="text-2xl font-bold">
           We couldn&rsquo;t load your account
         </h1>
         <p className="mt-2 text-ink-soft">Please refresh the page to try again.</p>

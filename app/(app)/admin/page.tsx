@@ -35,7 +35,7 @@ function Section({
 }) {
   return (
     <section className="mb-10">
-      <h2 className="font-display text-xl font-semibold">{title}</h2>
+      <h2 className="text-xl font-bold">{title}</h2>
       <p className="mb-3 text-sm text-ink-soft">{hint}</p>
       {children}
     </section>
@@ -44,15 +44,15 @@ function Section({
 
 function Table({ head, children }: { head: string[]; children: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-line bg-card">
+    <div className="overflow-x-auto rounded-lg border border-line bg-card">
       <table className="w-full min-w-[34rem] text-left text-sm">
-        <thead>
+        <thead className="bg-paper">
           <tr className="border-b border-line">
             {head.map((label) => (
               <th
                 key={label}
                 scope="col"
-                className="px-4 py-2.5 font-mono text-[11px] font-normal uppercase tracking-wider text-ink-soft"
+                className="px-4 py-2.5 text-xs font-semibold text-ink-soft"
               >
                 {label || <span className="sr-only">Actions</span>}
               </th>
@@ -65,7 +65,8 @@ function Table({ head, children }: { head: string[]; children: ReactNode }) {
   );
 }
 
-const cell = "px-4 py-2.5 align-middle";
+// One line per row; the table scrolls sideways inside its frame on narrow screens.
+const cell = "whitespace-nowrap px-4 py-2.5 align-middle";
 
 function MoreButton({ status, onMore }: { status: string; onMore: () => void }) {
   if (status !== "CanLoadMore") return null;
@@ -149,13 +150,13 @@ function AllLoans() {
               <td className={`${cell} font-medium`}>{loan.toolName}</td>
               <td className={cell}>{loan.lenderName}</td>
               <td className={cell}>{loan.borrowerName}</td>
-              <td className={`${cell} whitespace-nowrap font-mono text-xs`}>
+              <td className={`${cell} whitespace-nowrap tabular-nums`}>
                 {formatRange(loan.startDate, loan.endDate)}
               </td>
               <td className={cell}>
                 <Badge tone={badge.tone}>{badge.label}</Badge>
               </td>
-              <td className={`${cell} font-mono text-xs ${latest?.isProblem ? "text-rust" : "text-ink-soft"}`}>
+              <td className={`${cell} text-xs ${latest?.isProblem ? "text-rust" : "text-ink-soft"}`}>
                 {latest?.text}
               </td>
             </tr>
@@ -245,7 +246,7 @@ function Neighbors() {
                 onChange={(e) =>
                   run(() => setTrusted({ userId: user._id, trusted: e.target.checked }))
                 }
-                className="h-4 w-4 accent-[var(--color-moss)]"
+                className="h-4 w-4 accent-[var(--color-ink)]"
               />
               <span className="text-ink-soft">{user.isTrustedLender ? "Trusted" : "Not yet"}</span>
             </label>

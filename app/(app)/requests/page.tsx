@@ -37,7 +37,7 @@ export default function RequestsPage() {
           title="You haven't borrowed anything yet"
           hint="Find something useful on the board and send a request."
           action={
-            <Link href="/tools" className="font-medium text-moss underline underline-offset-2">
+            <Link href="/tools" className="font-medium text-ink underline underline-offset-2">
               Browse tools
             </Link>
           }

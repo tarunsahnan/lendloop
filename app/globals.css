@@ -1,24 +1,28 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #f5f0e6;
-  --color-card: #fffdf8;
-  --color-ink: #1d2521;
-  --color-ink-soft: #5a645e;
-  --color-line: #e3dbcb;
-  --color-moss: #2b5a46;
-  --color-moss-deep: #20463a;
-  --color-moss-soft: #dfe9e0;
-  --color-amber: #875208;
-  --color-amber-soft: #f7e7c9;
-  --color-rust: #a03a23;
-  --color-rust-soft: #f8ded5;
-  --color-slate: #3a5568;
-  --color-slate-soft: #e0e8ee;
+  --color-paper: #f5f5f3;
+  --color-card: #ffffff;
+  --color-ink: #18181b;
+  --color-ink-soft: #5c5c63;
+  --color-line: #e2e2de;
+
+  /* Tool yellow: primary actions and the logo. Always paired with ink text. */
+  --color-brand: #ffcc00;
+  --color-brand-deep: #f0bd00;
+  --color-brand-soft: #fff3c4;
+
+  /* Status colors */
+  --color-go: #1f7a3d;
+  --color-go-soft: #e2f3e7;
+  --color-amber: #8a5300;
+  --color-amber-soft: #fcefd4;
+  --color-rust: #b42318;
+  --color-rust-soft: #fde7e4;
+  --color-slate: #2f4a63;
+  --color-slate-soft: #e5ecf3;
 
   --font-sans: var(--font-body);
-  --font-display: var(--font-heading);
-  --font-mono: var(--font-code);
 }
 
 body {
@@ -27,17 +31,22 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-moss);
+  outline: 2px solid var(--color-ink);
   outline-offset: 2px;
 }
 
 dialog::backdrop {
-  background: rgb(29 37 33 / 0.45);
+  background: rgb(24 24 27 / 0.5);
 }
 
-.leader {
-  flex: 1;
-  min-width: 1.5rem;
-  border-bottom: 1.5px dotted var(--color-line);
-  transform: translateY(-0.3em);
+/* A highlighter stroke behind a phrase. */
+.marker {
+  background: linear-gradient(
+    transparent 58%,
+    var(--color-brand) 58%,
+    var(--color-brand) 92%,
+    transparent 92%
+  );
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }

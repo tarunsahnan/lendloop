@@ -1,6 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, IBM_Plex_Mono, Instrument_Sans } from "next/font/google";
+import { Archivo } from "next/font/google";
 import type { ReactNode } from "react";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ToastProvider } from "@/components/Toast";
@@ -13,19 +13,8 @@ import {
 } from "@/lib/site";
 import "./globals.css";
 
-const heading = Bricolage_Grotesque({
-  variable: "--font-heading",
-  subsets: ["latin"],
-});
-
-const body = Instrument_Sans({
+const body = Archivo({
   variable: "--font-body",
-  subsets: ["latin"],
-});
-
-const code = IBM_Plex_Mono({
-  variable: "--font-code",
-  weight: ["400", "500"],
   subsets: ["latin"],
 });
 
@@ -58,7 +47,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${heading.variable} ${body.variable} ${code.variable} h-full antialiased`}
+      className={`${body.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
         <ClerkProvider>
