@@ -6,6 +6,12 @@ A neighborhood tool-lending board. Neighbors list tools, request them for a date
 
 Built with Next.js (App Router), Clerk, Convex, n8n and TypeScript.
 
+**Live demo: <https://lendloop.15-252-231-30.sslip.io>**
+
+- Sign in with Google or an email address. The board is preloaded with demo neighbors, listings and loans.
+- It runs on a single AWS Lightsail instance with Docker Compose: the Next.js app, a self-hosted Convex backend and n8n, behind Caddy for HTTPS. n8n is not exposed to the internet; Convex and n8n talk over the private Docker network.
+- The overdue reminder workflow runs daily at 09:00 UTC. One demo borrower always fails, so the admin page shows how failures surface.
+
 - [Quick start](#quick-start)
 - [See it work](#see-it-work)
 - [Environment variables](#environment-variables)
