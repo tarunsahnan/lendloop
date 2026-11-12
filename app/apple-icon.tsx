@@ -9,11 +9,11 @@ export default function AppleIcon() {
   return new ImageResponse(
     (
       <svg width={180} height={180} viewBox="0 0 32 32">
-        <rect width="32" height="32" fill={BRAND_COLORS.moss} />
+        <rect width="32" height="32" fill={BRAND_COLORS.brand} />
         <path
           d={LOGO_LOOP_PATH}
           fill="none"
-          stroke={BRAND_COLORS.card}
+          stroke={BRAND_COLORS.ink}
           strokeWidth="2.6"
           strokeLinejoin="round"
         />

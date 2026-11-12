@@ -16,10 +16,11 @@ export const DESCRIPTION =
 export const LOGO_LOOP_PATH =
   "M11 11.5a6.5 6.5 0 1 0 0 9h10a6.5 6.5 0 1 0 0-9H11z";
 
+/** Mirrors the theme in app/globals.css, for places that cannot read CSS variables. */
 export const BRAND_COLORS = {
-  paper: "#f5f0e6",
-  card: "#fffdf8",
-  ink: "#1d2521",
-  inkSoft: "#5a645e",
-  moss: "#2b5a46",
+  paper: "#f5f5f3",
+  card: "#ffffff",
+  ink: "#18181b",
+  inkSoft: "#5c5c63",
+  brand: "#ffcc00",
 } as const;

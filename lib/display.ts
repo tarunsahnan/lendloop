@@ -1,7 +1,7 @@
 import type { Category, Condition, LoanStatus } from "@/convex/lib/constants";
 import { daysBetween, utcToday } from "@/convex/lib/dates";
 
-export type Tone = "moss" | "amber" | "rust" | "slate" | "neutral";
+export type Tone = "green" | "amber" | "rust" | "slate" | "neutral";
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   power_tools: "Power tools",
@@ -62,7 +62,7 @@ export type Availability = { label: string; tone: Tone; canRequest: boolean };
 export function availabilityOf(
   activeLoan: { startDate: string; endDate: string } | undefined,
 ): Availability {
-  if (!activeLoan) return { label: "Available", tone: "moss", canRequest: true };
+  if (!activeLoan) return { label: "Available", tone: "green", canRequest: true };
   const now = today();
   if (activeLoan.endDate < now) {
     const days = daysBetween(activeLoan.endDate, now);
@@ -101,7 +101,7 @@ export function loanBadge(loan: {
     case "cancelled":
       return { label: "Cancelled", tone: "neutral" };
     case "returned":
-      return { label: "Returned", tone: "moss" };
+      return { label: "Returned", tone: "green" };
   }
 }
 

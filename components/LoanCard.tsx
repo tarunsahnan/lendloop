@@ -32,14 +32,14 @@ export function LoanCard({
   const latest = loan.activity[0] ? describeActivity(loan.activity[0]) : null;
 
   return (
-    <article className="rounded-xl border border-line bg-card p-5">
+    <article className="rounded-lg border border-line bg-card p-5">
       <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
         <div>
-          <h2 className="font-display text-lg font-semibold leading-snug">
+          <h2 className="text-lg font-bold leading-snug">
             {loan.toolName}
           </h2>
           <p className="mt-0.5 text-sm text-ink-soft">
-            <span className="font-mono text-[13px]">
+            <span className="tabular-nums">
               {formatRange(loan.startDate, loan.endDate)}
             </span>
             <span aria-hidden className="mx-1.5">
@@ -47,7 +47,7 @@ export function LoanCard({
             </span>
             {counterpartLabel} {loan.counterpartName}
             {loan.counterpartIsTrusted && (
-              <span className="ml-1.5 font-medium text-moss">Trusted Lender</span>
+              <span className="ml-1.5 font-medium text-go">Trusted Lender</span>
             )}
           </p>
         </div>
@@ -55,7 +55,7 @@ export function LoanCard({
       </div>
 
       {loan.pickupNote && (
-        <p className="mt-3 rounded-lg bg-moss-soft px-3 py-2 text-sm text-moss-deep">
+        <p className="mt-3 rounded-md border-l-4 border-brand bg-brand-soft px-3 py-2 text-sm text-ink">
           <span className="font-medium">Pickup: </span>
           {loan.pickupNote}
         </p>
@@ -64,7 +64,7 @@ export function LoanCard({
       {(latest || actions) && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <p
-            className={`font-mono text-xs ${
+            className={`text-xs ${
               latest?.isProblem ? "text-rust" : "text-ink-soft"
             }`}
           >

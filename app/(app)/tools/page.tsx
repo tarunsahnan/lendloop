@@ -41,10 +41,10 @@ export default function ToolsPage() {
             type="button"
             aria-pressed={category === value}
             onClick={() => setCategory(value)}
-            className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+            className={`rounded-full border px-3 py-1 text-sm font-medium transition-colors ${
               category === value
-                ? "border-moss bg-moss text-card"
-                : "border-line bg-card text-ink-soft hover:text-ink"
+                ? "border-ink bg-ink text-card"
+                : "border-line bg-card text-ink-soft hover:border-ink-soft hover:text-ink"
             }`}
           >
             {label}
