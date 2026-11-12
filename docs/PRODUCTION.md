@@ -1,6 +1,17 @@
 # Production roadmap
 
-LendLoop runs as a local development stack today. These are the changes planned before it serves real neighborhoods.
+LendLoop runs locally with Docker Compose, and the live demo runs the same stack on a single AWS Lightsail instance. These are the changes planned before it serves real neighborhoods.
+
+## Before the first release
+
+- I would read every line of code in this repository, including the exported n8n workflows, before releasing it to production. Passing tests and a working demo are not the same as knowing exactly what ships.
+
+## Hosting
+
+- The demo puts the app, Convex and n8n on one instance, so one failure takes everything down, and Convex data sits on a single disk with no backups. Move the app to a managed host, use a Convex production deployment (or self-hosted Convex on managed Postgres with backups), and give n8n its own service as below.
+- Use a real domain instead of the `sslip.io` address, with a Clerk production instance on that domain.
+- Deploy from CI by building an image and rolling it out, instead of pulling and building on the server.
+- Remove the demo users and data.
 
 ## n8n
 
