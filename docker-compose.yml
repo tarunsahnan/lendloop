@@ -1,0 +1,38 @@
+x-n8n-env: &n8n-env
+  GENERIC_TIMEZONE: UTC
+  N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?Run npm run setup first}
+  N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
+  N8N_DIAGNOSTICS_ENABLED: "false"
+  N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+  N8N_TEMPLATES_ENABLED: "false"
+  EXECUTIONS_DATA_PRUNE: "true"
+  EXECUTIONS_DATA_MAX_AGE: "168"
+
+services:
+  n8n-setup:
+    image: n8nio/n8n:2.46.7
+    entrypoint: ["/bin/sh", "/setup/import.sh"]
+    environment: *n8n-env
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/import.sh:/setup/import.sh:ro
+      - ./n8n/workflows:/workflows:ro
+      - ./n8n/.runtime:/runtime:ro
+
+  n8n:
+    image: n8nio/n8n:2.46.7
+    restart: unless-stopped
+    depends_on:
+      n8n-setup:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment: *n8n-env
+    # Lets n8n reach the local Convex backend. Docker Desktop provides this name; Linux needs the mapping.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:

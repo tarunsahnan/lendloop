@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f5f0e6;
+  --color-card: #fffdf8;
+  --color-ink: #1d2521;
+  --color-ink-soft: #5a645e;
+  --color-line: #e3dbcb;
+  --color-moss: #2b5a46;
+  --color-moss-deep: #20463a;
+  --color-moss-soft: #dfe9e0;
+  --color-amber: #875208;
+  --color-amber-soft: #f7e7c9;
+  --color-rust: #a03a23;
+  --color-rust-soft: #f8ded5;
+  --color-slate: #3a5568;
+  --color-slate-soft: #e0e8ee;
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-heading);
+  --font-mono: var(--font-code);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-moss);
+  outline-offset: 2px;
+}
+
+dialog::backdrop {
+  background: rgb(29 37 33 / 0.45);
+}
+
+.leader {
+  flex: 1;
+  min-width: 1.5rem;
+  border-bottom: 1.5px dotted var(--color-line);
+  transform: translateY(-0.3em);
+}
